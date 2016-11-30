@@ -111,7 +111,7 @@ namespace RemLogWS
                                         {
                                             string NameDate = dateTraitement.ToString("yyyyMMdd");
                                             string Date = dateTraitement.ToString("dd/MM/yyyy HH:mm:ss");
-                                            using (StreamWriter writer = new StreamWriter(@"C:\ProgramData\CtrlPc\LOG\RemLogWS_" + NameDate + ".log"))
+                                            using (StreamWriter writer = File.AppendText(@"C:\ProgramData\CtrlPc\LOG\RemLogWS_" + NameDate + ".log"))
                                             {
                                                 writer.WriteLine(Date + "     " + "RemLogWS.exe" + "     " + "ERREUR : " + err.Message);
                                             }
@@ -127,7 +127,7 @@ namespace RemLogWS
                                         {
                                             string NameDate = dateTraitement.ToString("yyyyMMdd");
                                             string Date = dateTraitement.ToString("dd/MM/yyyy HH:mm:ss");
-                                            using (StreamWriter writer = new StreamWriter(@"C:\ProgramData\CtrlPc\LOG\RemLogWS_" + NameDate + ".log"))
+                                            using (StreamWriter writer = File.AppendText(@"C:\ProgramData\CtrlPc\LOG\RemLogWS_" + NameDate + ".log"))
                                             {
                                                 writer.WriteLine(Date + "     " + "RemLogWS.exe" + "     " + "ERREUR : " + err.Message);
                                             }
@@ -144,7 +144,7 @@ namespace RemLogWS
                     {
                         string NameDate = dateTraitement.ToString("yyyyMMdd");
                         string Date = dateTraitement.ToString("dd/MM/yyyy HH:mm:ss");
-                        using (StreamWriter writer = new StreamWriter(@"C:\ProgramData\CtrlPc\LOG\RemLogWS_" + NameDate + ".log"))
+                        using (StreamWriter writer = File.AppendText(@"C:\ProgramData\CtrlPc\LOG\RemLogWS_" + NameDate + ".log"))
                         {
                             writer.WriteLine(Date + "     " + "RemLogWS.exe" + "     " + "ERREUR : " + err.Message);
                         }
