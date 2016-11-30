@@ -16,9 +16,7 @@ namespace RemLogWS
             int statusParam = 3;
             int type = 3;
             ReferenceWSCtrlPc.WSCtrlPc ws = new ReferenceWSCtrlPc.WSCtrlPc();
-            string pathJournal = @"C:\ProgramData\CtrlPc\LOG\Journal.log";
             Object Guid = Registry.GetValue(@"HKEY_USERS\.DEFAULT\Software\CtrlPc\Version", "GUID", null);
-            string pathJournalTransfert = @"C:\ProgramData\CtrlPc\LOG\Journal_transfert.log";
             DateTime dateTraitement = DateTime.Now;
 
             if (File.Exists(@"c:\ProgramData\CtrlPc\SCRIPT\RemLog.nfo"))
@@ -57,7 +55,7 @@ namespace RemLogWS
                         File.Move(file, file + "_transfert");
                         if (File.Exists(file + "_transfert"))
                         {
-                            string[] ligne = File.ReadAllLines(pathJournalTransfert);
+                            string[] ligne = File.ReadAllLines(file + "_transfert");
                             string colonne1 = "";
                             string codeappli2 = "";
                             string statut = "";
