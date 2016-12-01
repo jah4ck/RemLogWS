@@ -43,7 +43,7 @@ namespace RemLogWS
             if (status != 1)
             {
 
-                string[] lstFile = Directory.GetFiles(@"C:\ProgramData\CtrlPc\LOG\JOURNAL_ERREUR_*");
+                string[] lstFile = Directory.GetFiles(@"C:\ProgramData\CtrlPc\LOG\","JOURNAL_ERREUR_*");
                 foreach (string file in lstFile)
                 {
                     try
