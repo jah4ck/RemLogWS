@@ -141,7 +141,6 @@ namespace RemLogWS
                                                 }
                                                 catch (Exception err)
                                                 {
-
                                                 }
 
                                             }
