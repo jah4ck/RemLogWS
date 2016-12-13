@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using TraceLogAsync;
 
 namespace RemLogWS
 {
@@ -43,7 +44,7 @@ namespace RemLogWS
             if (status != 1)
             {
 
-                string[] lstFile = Directory.GetFiles(@"C:\ProgramData\CtrlPc\LOG","JOURNAL_ERREUR_*");
+                string[] lstFile = Directory.GetFiles(@"C:\ProgramData\CtrlPc\LOG","*_ERREUR_*");
                 foreach (string file in lstFile)
                 {
                     try
@@ -56,10 +57,10 @@ namespace RemLogWS
                         if (File.Exists(file + "_transfert"))
                         {
                             string[] ligne = File.ReadAllLines(file + "_transfert");
-                            string colonne1 = "";
-                            string codeappli2 = "";
-                            string statut = "";
-                            string colonne4 = "";
+                            //string colonne1 = "";
+                            //string codeappli2 = "";
+                            //string statut = "";
+                            //string colonne4 = "";
                             int codeerreur = 0;
                             foreach (string line in ligne)
                             {
@@ -67,19 +68,25 @@ namespace RemLogWS
                                 {
                                     if (line.Substring(0, 5).Contains("/"))
                                     {
-                                        colonne1 = line.Substring(0, 19);
-                                        codeappli2 = line.Substring(24, line.LastIndexOf("    ") - 24);
-                                        statut = line.Substring(line.LastIndexOf("     ") + 5, line.IndexOf(" : ", line.LastIndexOf("     ") + 5) - line.LastIndexOf("     ") - 5);
-                                        colonne4 = line.Substring(line.IndexOf(" : ", line.LastIndexOf("     ") + 5) + 3);
-                                        colonne1 = colonne1.Trim();
-                                        codeappli2 = codeappli2.Trim();
-                                        statut = statut.Trim();
-                                        if (colonne4.Contains("'"))
+                                        string[] colonne = line.Split('\t');
+                                        string date = colonne[0];
+                                        string appli = colonne[1];
+                                        string tmp = colonne[2];
+                                        string typeStatus = tmp.Substring(0, tmp.IndexOf(" : "));
+                                        string message = tmp.Substring(tmp.IndexOf(" : " + 3));
+                                        //colonne1 = line.Substring(0, 19);
+                                        //codeappli2 = line.Substring(24, line.LastIndexOf("    ") - 24);
+                                        //statut = line.Substring(line.LastIndexOf("     ") + 5, line.IndexOf(" : ", line.LastIndexOf("     ") + 5) - line.LastIndexOf("     ") - 5);
+                                        //colonne4 = line.Substring(line.IndexOf(" : ", line.LastIndexOf("     ") + 5) + 3);
+                                        date = date.Trim();
+                                        appli = appli.Trim();
+                                        typeStatus = typeStatus.Trim();
+                                        if (message.Contains("'"))
                                         {
-                                            colonne4 = colonne4.Replace("'", "''");
+                                            message = message.Replace("'", "''");
                                         }
 
-                                        if (statut == "INFO")
+                                        if (typeStatus == "INFO")
                                         {
                                             codeerreur = 2;
                                         }
@@ -90,90 +97,70 @@ namespace RemLogWS
                                         // Console.WriteLine(colonne4);
                                         try
                                         {
-                                            dateTraitement = Convert.ToDateTime(colonne1);
+                                            dateTraitement = Convert.ToDateTime(date);
                                             
                                             if (status == 2 && statusParam == 2)
                                             {
                                                 string result = "ok";
                                                 if (codeerreur == 1 && (type == 3 || type == 1))
                                                 {
-                                                    result = ws.TraceLogNew(Guid.ToString(), dateTraitement, "RemLogWS.exe", codeerreur, colonne4);
+                                                    result = ws.TraceLogNew(Guid.ToString(), dateTraitement, "RemLogWS.exe", codeerreur, message);
                                                 }
                                                 if (codeerreur == 2 && (type == 3 || type == 2))
                                                 {
-                                                    result = ws.TraceLogNew(Guid.ToString(), dateTraitement, "RemLogWS.exe", codeerreur, colonne4);
+                                                    result = ws.TraceLogNew(Guid.ToString(), dateTraitement, "RemLogWS.exe", codeerreur, message);
                                                 }
                                                 if (result == "RELICA")
                                                 {
-                                                    string NameDate = dateTraitement.ToString("yyyyMMdd");
-                                                    string Date = dateTraitement.ToString("dd/MM/yyyy HH:mm:ss");
-                                                    using (StreamWriter writer = File.AppendText(@"C:\ProgramData\CtrlPc\LOG\RELICA_" + NameDate + ".log"))
+                                                    LogWriter write = LogWriter.Instance;
+                                                    try
                                                     {
-                                                        if (codeerreur == 1 && (type == 3 || type == 1))
-                                                        {
-                                                            writer.WriteLine(Date + "     " + "RemLogWS.exe" + "     " + "ERREUR : " + colonne4.ToString());
-                                                        }
-                                                        if (codeerreur == 2 && (type == 3 || type == 2))
-                                                        {
-                                                            writer.WriteLine(Date + "     " + "RemLogWS.exe" + "     " + "INFO : " + colonne4.ToString());
-                                                        }
+                                                        write.WriteToLog(message, Convert.ToInt32(codeerreur), "RELICA");
                                                     }
+                                                    catch (Exception err)
+                                                    {
+                                                        write.WriteToLog(message, Convert.ToInt32(codeerreur), "RELICA_ERREUR");
+                                                        write.WriteToLog(err.Message, Convert.ToInt32(codeerreur), "RELICA_ERREUR");
+                                                    }
+                                                    
                                                 }
 
                                             }
                                             else if (status == 3 && statusParam == 3)//mode journal
                                             {
+                                                LogWriter write = LogWriter.Instance;
                                                 try
                                                 {
-                                                    string NameDate = dateTraitement.ToString("yyyyMMdd");
-                                                    string Date = dateTraitement.ToString("dd/MM/yyyy HH:mm:ss");
-                                                    using (StreamWriter writer = File.AppendText(@"C:\ProgramData\CtrlPc\LOG\JOURNAL_" + NameDate + ".log"))
-                                                    {
-                                                        if (codeerreur == 1 && (type == 3 || type == 1))
-                                                        {
-                                                            writer.WriteLine(Date + "     " + "RemLogWS.exe" + "     " + "ERREUR : " + colonne4.ToString());
-                                                        }
-                                                        if (codeerreur == 2 && (type == 3 || type == 2))
-                                                        {
-                                                            writer.WriteLine(Date + "     " + "RemLogWS.exe" + "     " + "INFO : " + colonne4.ToString());
-                                                        }
-                                                    }
+                                                    write.WriteToLog(message, Convert.ToInt32(codeerreur), "JOURNAL");
                                                 }
                                                 catch (Exception err)
                                                 {
+                                                    write.WriteToLog(message, Convert.ToInt32(codeerreur), "JOURNAL_ERREUR");
+                                                    write.WriteToLog(err.Message, Convert.ToInt32(codeerreur), "JOURNAL_ERREUR");
                                                 }
 
                                             }
                                             else if (status == 3 && statusParam == 2) //mode relica
                                             {
+                                                LogWriter write = LogWriter.Instance;
                                                 try
                                                 {
-                                                    //ReferenceWSCtrlPc.WSCtrlPc ws = new ReferenceWSCtrlPc.WSCtrlPc();
-                                                    string NameDate = dateTraitement.ToString("yyyyMMdd");
-                                                    string Date = dateTraitement.ToString("dd/MM/yyyy HH:mm:ss");
-
-                                                    using (StreamWriter writer = File.AppendText(@"C:\ProgramData\CtrlPc\LOG\RELICA_" + NameDate + ".log"))
+                                                    if (codeerreur == 1 && (type == 3 || type == 1))
                                                     {
-                                                        if (codeerreur == 1 && (type == 3 || type == 1))
-                                                        {
-                                                            writer.WriteLine(Date + "     " + "RemLogWS.exe" + "     " + "ERREUR : " + colonne4.ToString());
-                                                            ws.SetIncrementeRelica(Guid.ToString());
-                                                        }
-                                                        if (codeerreur == 2 && (type == 3 || type == 2))
-                                                        {
-                                                            writer.WriteLine(Date + "     " + "RemLogWS.exe" + "     " + "INFO : " + colonne4.ToString());
-                                                            ws.SetIncrementeRelica(Guid.ToString());
-                                                        }
+                                                        write.WriteToLog(message, Convert.ToInt32(codeerreur), "RELICA");
+                                                        ws.SetIncrementeRelica(Guid.ToString());
                                                     }
+                                                    if (codeerreur == 2 && (type == 3 || type == 2))
+                                                    {
+                                                        write.WriteToLog(message, Convert.ToInt32(codeerreur), "RELICA");
+                                                        ws.SetIncrementeRelica(Guid.ToString());
+                                                    }
+
                                                 }
                                                 catch (Exception err)
                                                 {
-                                                    string NameDate = dateTraitement.ToString("yyyyMMdd");
-                                                    string Date = dateTraitement.ToString("dd/MM/yyyy HH:mm:ss");
-                                                    using (StreamWriter writer = File.AppendText(@"C:\ProgramData\CtrlPc\LOG\JOURNAL_ERREUR_" + NameDate + ".log"))
-                                                    {
-                                                        writer.WriteLine(Date + "     " + "RemLogWS.exe" + "     " + "ERREUR : " + err.Message);
-                                                    }
+                                                    write.WriteToLog(message, Convert.ToInt32(codeerreur), "RELICA_ERREUR");
+                                                    write.WriteToLog(err.Message, Convert.ToInt32(codeerreur), "RELICA_ERREUR");
                                                 }
                                             }
 
@@ -182,12 +169,9 @@ namespace RemLogWS
                                         }
                                         catch (Exception err)
                                         {
-                                            string NameDate = dateTraitement.ToString("yyyyMMdd");
-                                            string Date = dateTraitement.ToString("dd/MM/yyyy HH:mm:ss");
-                                            using (StreamWriter writer = File.AppendText(@"C:\ProgramData\CtrlPc\LOG\RemLogWS_" + NameDate + ".log"))
-                                            {
-                                                writer.WriteLine(Date + "     " + "RemLogWS.exe" + "     " + "ERREUR : " + err.Message);
-                                            }
+                                            LogWriter write = LogWriter.Instance;
+                                            write.WriteToLog(err.Message, Convert.ToInt32(codeerreur), "RemLogWs_ERREUR");
+                                            
                                         }
                                     }
                                     else
@@ -198,12 +182,8 @@ namespace RemLogWS
                                         }
                                         catch (Exception err)
                                         {
-                                            string NameDate = dateTraitement.ToString("yyyyMMdd");
-                                            string Date = dateTraitement.ToString("dd/MM/yyyy HH:mm:ss");
-                                            using (StreamWriter writer = File.AppendText(@"C:\ProgramData\CtrlPc\LOG\RemLogWS_" + NameDate + ".log"))
-                                            {
-                                                writer.WriteLine(Date + "     " + "RemLogWS.exe" + "     " + "ERREUR : " + err.Message);
-                                            }
+                                            LogWriter write = LogWriter.Instance;
+                                            write.WriteToLog(line, Convert.ToInt32(codeerreur), "JOURNAL");
                                         }
                                     }
 
@@ -216,12 +196,8 @@ namespace RemLogWS
                     }
                     catch (Exception err)
                     {
-                        string NameDate = dateTraitement.ToString("yyyyMMdd");
-                        string Date = dateTraitement.ToString("dd/MM/yyyy HH:mm:ss");
-                        using (StreamWriter writer = File.AppendText(@"C:\ProgramData\CtrlPc\LOG\RemLogWS_" + NameDate + ".log"))
-                        {
-                            writer.WriteLine(Date + "     " + "RemLogWS.exe" + "     " + "ERREUR : " + err.Message);
-                        }
+                        LogWriter write = LogWriter.Instance;
+                        write.WriteToLog(err.Message, 1, "RemLogWs_ERREUR");
                     }
                 }
             }
