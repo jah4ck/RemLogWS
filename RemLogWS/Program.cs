@@ -80,22 +80,23 @@ namespace RemLogWS
                                         }
                                         catch (Exception err)
                                         {
-                                            write.WriteToLog("Erreur sur récupération du status", 1, "RELICA_ERREUR");
-                                            write.WriteToLog(err.Message, 1, "RELICA_ERREUR");
-                                            write.WriteToLog(err.StackTrace, 1, "RELICA_ERREUR");
+                                            write.WriteToLog("Erreur sur récupération du status", 1, "RemLogWS_ERREUR");
+                                            write.WriteToLog(err.Message, 1, "RemLogWS_ERREUR");
+                                            write.WriteToLog(err.StackTrace, 1, "RemLogWS_ERREUR");
                                             break;
                                         }
                                         
                                         string message = "";
                                         try
                                         {
-                                            message = tmp.Substring(tmp.IndexOf(" : " + 3));
+                                            message = tmp.Substring(tmp.IndexOf(" : ") + 3);
                                         }
                                         catch (Exception err)
                                         {
-                                            write.WriteToLog("Erreur sur récupération du Message", 1, "RELICA_ERREUR");
-                                            write.WriteToLog(err.Message, 1, "RELICA_ERREUR");
-                                            write.WriteToLog(err.StackTrace, 1, "RELICA_ERREUR");
+                                            write.WriteToLog("Erreur sur récupération du Message : ", 1, "RemLogWS_ERREUR");
+                                            write.WriteToLog("Colonne 2 ="+tmp, 1, "RemLogWS_ERREUR");
+                                            write.WriteToLog(err.Message, 1, "RemLogWS_ERREUR");
+                                            write.WriteToLog(err.StackTrace, 1, "RemLogWS_ERREUR");
                                             break;
                                         }
                                         
