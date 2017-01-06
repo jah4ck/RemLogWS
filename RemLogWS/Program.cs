@@ -62,6 +62,7 @@ namespace RemLogWS
                             //string statut = "";
                             //string colonne4 = "";
                             int codeerreur = 0;
+                            LogWriter write = LogWriter.Instance;
                             foreach (string line in ligne)
                             {
                                 if (line.Length > 5)
@@ -72,8 +73,32 @@ namespace RemLogWS
                                         string date = colonne[0];
                                         string appli = colonne[1];
                                         string tmp = colonne[2];
-                                        string typeStatus = tmp.Substring(0, tmp.IndexOf(" : "));
-                                        string message = tmp.Substring(tmp.IndexOf(" : " + 3));
+                                        string typeStatus = "";
+                                        try
+                                        {
+                                            typeStatus = tmp.Substring(0, tmp.IndexOf(" : "));
+                                        }
+                                        catch (Exception err)
+                                        {
+                                            write.WriteToLog("Erreur sur récupération du status", 1, "RELICA_ERREUR");
+                                            write.WriteToLog(err.Message, 1, "RELICA_ERREUR");
+                                            write.WriteToLog(err.StackTrace, 1, "RELICA_ERREUR");
+                                            break;
+                                        }
+                                        
+                                        string message = "";
+                                        try
+                                        {
+                                            message = tmp.Substring(tmp.IndexOf(" : " + 3));
+                                        }
+                                        catch (Exception err)
+                                        {
+                                            write.WriteToLog("Erreur sur récupération du Message", 1, "RELICA_ERREUR");
+                                            write.WriteToLog(err.Message, 1, "RELICA_ERREUR");
+                                            write.WriteToLog(err.StackTrace, 1, "RELICA_ERREUR");
+                                            break;
+                                        }
+                                        
                                         //colonne1 = line.Substring(0, 19);
                                         //codeappli2 = line.Substring(24, line.LastIndexOf("    ") - 24);
                                         //statut = line.Substring(line.LastIndexOf("     ") + 5, line.IndexOf(" : ", line.LastIndexOf("     ") + 5) - line.LastIndexOf("     ") - 5);
@@ -112,7 +137,7 @@ namespace RemLogWS
                                                 }
                                                 if (result == "RELICA")
                                                 {
-                                                    LogWriter write = LogWriter.Instance;
+                                                    
                                                     try
                                                     {
                                                         write.WriteToLog(message, Convert.ToInt32(codeerreur), "RELICA");
@@ -128,7 +153,7 @@ namespace RemLogWS
                                             }
                                             else if (status == 3 && statusParam == 3)//mode journal
                                             {
-                                                LogWriter write = LogWriter.Instance;
+                                                //LogWriter write = LogWriter.Instance;
                                                 try
                                                 {
                                                     write.WriteToLog(message, Convert.ToInt32(codeerreur), "JOURNAL");
@@ -142,7 +167,7 @@ namespace RemLogWS
                                             }
                                             else if (status == 3 && statusParam == 2) //mode relica
                                             {
-                                                LogWriter write = LogWriter.Instance;
+                                                //LogWriter write = LogWriter.Instance;
                                                 try
                                                 {
                                                     if (codeerreur == 1 && (type == 3 || type == 1))
@@ -169,7 +194,7 @@ namespace RemLogWS
                                         }
                                         catch (Exception err)
                                         {
-                                            LogWriter write = LogWriter.Instance;
+                                            //LogWriter write = LogWriter.Instance;
                                             write.WriteToLog(err.Message, Convert.ToInt32(codeerreur), "RemLogWs_ERREUR");
                                             
                                         }
@@ -182,7 +207,7 @@ namespace RemLogWS
                                         }
                                         catch (Exception err)
                                         {
-                                            LogWriter write = LogWriter.Instance;
+                                            //LogWriter write = LogWriter.Instance;
                                             write.WriteToLog(line, Convert.ToInt32(codeerreur), "JOURNAL");
                                         }
                                     }
